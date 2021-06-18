@@ -1,0 +1,89 @@
+version: "3.9"
+
+networks:
+  tifs:
+
+services:
+  pd0:
+    image: pingcap/pd:latest
+    networks:
+      tifs:
+    command:
+      - --name=pd0
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://pd0:2379
+      - --advertise-peer-urls=http://pd0:2380
+      - --initial-cluster=pd0=http://pd0:2380
+      - --data-dir=/data
+
+  tikv0:
+    image: pingcap/tikv:latest
+    networks:
+      tifs:
+    depends_on:
+      - pd0
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv0:20160
+      - --data-dir=/data
+      - --pd=pd0:2379
+
+  tifs0:
+    image: hexilee/tifs:0.1.0
+    networks:
+      tifs:
+    depends_on:
+      - tikv0
+    devices:
+      - "/dev/fuse:/dev/fuse"
+    volumes:
+      - /mnt/tifs0:/mnt/tifs0:shared
+    privileged: true
+    command:
+      - --mount-point=/mnt/tifs0
+      - --pd-endpoints=http://pd0:2379
+
+  pd1:
+    image: pingcap/pd:latest
+    networks:
+      tifs:
+    depends_on:
+      - tifs0
+    command:
+      - --name=pd1
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://pd1:2379
+      - --advertise-peer-urls=http://pd1:2380
+      - --initial-cluster=pd1=http://pd1:2380
+      - --data-dir=/data
+
+  tikv1:
+    image: pingcap/tikv:latest
+    networks:
+      tifs:
+    depends_on:
+      - pd1
+    volumes:
+      - /mnt/tifs0/tikv1:/data
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv1:20160
+      - --data-dir=/data
+      - --pd=pd1:2379
+
+  tifs1:
+    image: hexilee/tifs:0.1.0
+    networks:
+      tifs:
+    depends_on:
+      - tikv1
+    devices:
+      - "/dev/fuse:/dev/fuse"
+    volumes:
+      - /mnt/tifs1:/mnt/tifs1:shared
+    privileged: true
+    command:
+      - --mount-point=/mnt/tifs1
+      - --pd-endpoints=http://pd1:2379
