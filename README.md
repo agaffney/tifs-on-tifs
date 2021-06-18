@@ -52,6 +52,32 @@ Mount the second tier TiFS.
 $ docker-compose up -d tifs1
 ```
 
+Make sure the mount succeeded.
+
+```bash
+$ mount | grep mnt/tifs1
+```
+
+### Cleaning up
+
+Stop the containers.
+
+```bash
+$ docker-compose down
+```
+
+Unmount the filesystems.
+
+```bash
+$ sudo umount -f /mnt/tifs0 /mnt/tifs1
+```
+
+Remove the mount dirs.
+
+```bash
+$ sudo rm -rf /mnt/tifs0 /mnt/tifs1
+```
+
 ## How well does it perform?
 
 This setup has terrible performance, but that's not really the point.
