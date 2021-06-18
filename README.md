@@ -15,13 +15,6 @@ https://pingcap.com/blog/tifs-a-tikv-based-partition-tolerant-strictly-consisten
 
 ## How do I use it?
 
-Unmount and clean up previous mount dirs.
-
-```bash
-$ sudo umount -f /mnt/tifs0 /mnt/tifs1
-$ sudo rm -rf /mnt/tifs0 /mnt/tifs1
-```
-
 Start the first tier PD and TiKV.
 
 ```bash
